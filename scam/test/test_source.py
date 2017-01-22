@@ -1,5 +1,6 @@
 import httmock
 import unittest
+import os
 from scam import source
 
 class IpCameraTestCase(unittest.TestCase):
@@ -39,3 +40,19 @@ class IpCameraTestCase(unittest.TestCase):
                 snapshot = camera.run({}, lambda: None)
 
 
+class StubSourceTestCase(unittest.TestCase):
+    def get_test_image_path(self, name):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        return os.path.join(dir_path, 'resources', name)
+
+    def test_success(self):
+        # Arrange
+        stub_source = source.StubSource('Test', [self.get_test_image_path('snapshot1.jpg'), self.get_test_image_path('snapshot2.jpg')])
+
+        # Act
+        context = {}
+        stub_source.run(context, lambda: None)
+
+        # Assert
+        self.assertEqual(context['SOURCE_EXTENSION'], '.jpg')
+        self.assertIn('SOURCE_RAW_CONTENT', context)
