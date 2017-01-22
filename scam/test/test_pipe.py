@@ -1,0 +1,65 @@
+import unittest
+from scam import pipe
+import os
+
+class PipeStub(pipe.Pipe):
+    def __init__(self):
+        self.run_called = False
+        self.error_called = False
+
+    def run(self, context, next_run):
+        self.run_called = True
+        return next_run()
+        
+    def error(self, context, exception, next_run):
+        self.error_called = True
+        return next_run()
+
+class ErrorPipeStub(pipe.Pipe):
+    def __init__(self):
+        self.error_called = False
+
+    def run(self, context, next_run):
+        raise Exception('BOOM')
+
+    def error(self, context, exception, next_run):
+        self.error_called = True
+        return next_run()
+
+class PipeTestCase(unittest.TestCase):
+    def load_snapshot(self, name, context):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        with open(os.path.join(dir_path, 'resources', name), 'rb') as fh:
+            context['SOURCE_EXTENSION'] = '.jpeg'
+            context['SOURCE_RAW_CONTENT'] = fh.read()
+
+    def test_run_calls_next(self):
+        # Arrange
+        first = PipeStub()
+        second = PipeStub()
+
+        runner = pipe.Runner([first, second], {})
+
+        # Act
+        runner.run()
+
+        # Assert
+        self.assertTrue(second.run_called)
+
+    def test_run_calls_next_error_on_exception(self):
+        # Arrange
+        first = PipeStub()
+        second = ErrorPipeStub()
+        third = PipeStub()
+
+        runner = pipe.Runner([first, second, third], {})
+
+        # Act
+        runner.run()
+
+        # Assert
+        self.assertTrue(first.run_called)
+        self.assertFalse(first.error_called)
+        self.assertTrue(second.error_called)
+        self.assertFalse(third.run_called)
+        self.assertTrue(third.error_called)
