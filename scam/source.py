@@ -57,7 +57,7 @@ class StubSource(pipe.Pipe):
     def run(self, context, next_run):
         index = context.get('SOURCE_CURRENT_INDEX', 0)
 
-        if index > len(self.image_paths):
+        if index >= len(self.image_paths):
             index = 0
 
         current_path = self.image_paths[index]
@@ -67,3 +67,4 @@ class StubSource(pipe.Pipe):
         _, context['SOURCE_EXTENSION'] = os.path.splitext(current_path)
         context['SOURCE_DATE'] = datetime.datetime.utcnow()
         context['SOURCE_CURRENT_INDEX'] = index + 1
+        return next_run()
