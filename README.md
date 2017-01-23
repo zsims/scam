@@ -1,7 +1,7 @@
 # scam
-Basic framework for creating headless motion detected security camera systems that runs on any hardware.
+Basic framework for creating headless motion detected security camera systems that runs on any hardware, including low power computers like the Raspberry Pi.
 
-It's intended to be flexible enough
+It's intended to be flexible enough to be used for a variety of sitatuions, e.g. inverval based, motion detected, save to Dropbox, save to the filesystem etc.
 
 # Development
  1. Install requirements: `pip install -r requirements`
