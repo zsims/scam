@@ -1,5 +1,9 @@
+import time
 
 class Runner(object):
+    """
+    Runs the given pipes once using the first pipe as the starting point
+    """
     def __init__(self, pipes, context):
        self.pipes = pipes
        self.context = context
@@ -26,7 +30,30 @@ class Runner(object):
     def run(self):
         self.run_pipe(0)()
 
+class LoopRunner(Runner):
+    """
+    Runs the pipeline constantly, sleeping for `sleep_seconds` between runs
+    """
+    def __init__(self, pipes, context, sleep_seconds=None):
+        self.sleep_seconds = sleep_seconds
+        self.running = True
+        super().__init__(pipes, context)
+
+    def stop(self):
+        self.running = False
+
+    def run(self):
+        while self.running:
+            super().run()
+            if self.sleep_seconds is not None:
+                time.sleep(self.sleep_seconds)
+        
+
+
 class Pipe(object):
+    """
+    Basic building block of a pipeline.
+    """
     def run(self, context, next_run):
         """
         Runs the stage of the pipeline. The next callback should be called to continue control

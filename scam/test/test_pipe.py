@@ -1,6 +1,7 @@
 import unittest
 from scam import pipe
 import os
+import threading
 
 class PipeStub(pipe.Pipe):
     def __init__(self):
@@ -10,10 +11,18 @@ class PipeStub(pipe.Pipe):
     def run(self, context, next_run):
         self.run_called = True
         return next_run()
-        
+
     def error(self, context, exception, next_run):
         self.error_called = True
         return next_run()
+
+class CallbackPipe(pipe.Pipe):
+    def __init__(self, run_callback):
+        self.run_callback = run_callback
+
+    def run(self, context, next_run):
+        self.run_callback(context, next_run)
+
 
 class ErrorPipeStub(pipe.Pipe):
     def __init__(self):
@@ -63,3 +72,28 @@ class PipeTestCase(unittest.TestCase):
         self.assertTrue(second.error_called)
         self.assertFalse(third.run_called)
         self.assertTrue(third.error_called)
+
+class LoopRunnerTestCase(unittest.TestCase):
+    def test_run_calls_next(self):
+        # Arrange
+        first = PipeStub()
+        second = PipeStub()
+
+        finish_event = threading.Event()
+        call_count = 0
+        def do_it(context, run_next):
+            nonlocal call_count
+            if call_count > 0:
+                finish_event.set()
+            call_count = call_count + 1
+
+        third = CallbackPipe(do_it)
+        runner = pipe.LoopRunner([first, second, third], {})
+
+        # Act
+        threading.Thread(target=runner.run).start()
+
+        # Assert
+        finish_event.wait(timeout=2)
+        runner.stop()
+        self.assertTrue(finish_event.is_set())
