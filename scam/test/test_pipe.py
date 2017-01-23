@@ -105,7 +105,7 @@ class AnyTestCase(unittest.TestCase):
         self.assertFalse(second.pipes[2].run_called)
         self.assertTrue(third.run_called)
 
-class LoopRunnerTestCase(unittest.TestCase):
+class MultiLoopRunnerTestCase(unittest.TestCase):
     def test_run_calls_next(self):
         # Arrange
         first = PipeStub()
@@ -120,7 +120,7 @@ class LoopRunnerTestCase(unittest.TestCase):
             call_count = call_count + 1
 
         third = pipe.CallbackPipe(do_it)
-        runner = pipe.LoopRunner([first, second, third], {})
+        runner = pipe.MultiLoopRunner([[first, second, third]])
 
         # Act
         threading.Thread(target=runner.run).start()

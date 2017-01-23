@@ -29,23 +29,24 @@ class Runner(object):
     def run(self):
         self.run_pipe(0)()
 
-class LoopRunner(Runner):
+class MultiLoopRunner(object):
     """
-    Runs the pipeline constantly, sleeping for `sleep_seconds` between runs
+    Runs the given piplines (array of array of pipes) constantly, sleeping for `sleep_seconds` between runs
     """
-    def __init__(self, pipes, context, sleep_seconds=None):
+    def __init__(self, pipelines, sleep_seconds=None):
         self.sleep_seconds = sleep_seconds
         self.running = True
-        super().__init__(pipes, context)
+        self.runners = [Runner(x, {}) for x in pipelines]
 
     def stop(self):
         self.running = False
 
     def run(self):
         while self.running:
-            super().run()
-            if self.sleep_seconds is not None:
-                time.sleep(self.sleep_seconds)
+            for runner in self.runners:
+                runner.run()
+                if self.sleep_seconds is not None:
+                    time.sleep(self.sleep_seconds)
 
 
 class Pipe(object):

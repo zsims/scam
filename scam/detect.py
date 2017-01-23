@@ -37,9 +37,9 @@ class ContourMatcher(pipe.Pipe):
     PREVIOUS_FRAME = 'CONTOUR_MATCHER_PREVIOUS_FRAME'
     PREVIOUS_FRAME_GRAY = 'CONTOUR_MATCHER_PREVIOUS_FRAME_GRAY'
 
-    def __init__(self, minimum_area=300, show_contours=False):
+    def __init__(self, minimum_area=300, show_bounding_box=False):
         self.minimum_area = minimum_area
-        self.show_contours = show_contours
+        self.show_bounding_box = show_bounding_box
 
     def run(self, context, next_run):
         if 'SOURCE_RAW_CONTENT' not in context:
@@ -79,7 +79,7 @@ class ContourMatcher(pipe.Pipe):
         context[ContourMatcher.PREVIOUS_FRAME_GRAY] = current_gray
 
         if matched:
-            if self.show_contours:
+            if self.show_bounding_box:
                 _, content = cv2.imencode(context['SOURCE_EXTENSION'], contoured_frame)
                 context['SOURCE_RAW_CONTENT'] = content.tostring()
             return next_run()
