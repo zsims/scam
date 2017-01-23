@@ -38,12 +38,15 @@ runner.run()
 With the following results:
 
 **Frame 1**
+
 ![Frame1](https://raw.github.com/zsims/scam/master/scam/test/resources/snapshot1.jpg)
 
 **Frame 2**
+
 ![Frame2](https://raw.github.com/zsims/scam/master/scam/test/resources/snapshot1.jpg)
 
 **Match with Bounding Box**
+
 ![Match with Bounding Box](https://raw.github.com/zsims/scam/master/scam/test/resources/match.jpg)
 
 ## Running as a Service
