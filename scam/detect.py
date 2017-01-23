@@ -1,5 +1,6 @@
 import cv2
 import numpy
+import datetime
 from scam import pipe
 
 class NoFrameContentError(Exception):
@@ -7,6 +8,24 @@ class NoFrameContentError(Exception):
     No frame content currently available
     """
     pass
+
+class IntervalMatcher(pipe.Pipe):
+    """
+    Continues at set intervals
+    """
+    def __init__(self, time_delta):
+        """
+        Run at every timedelta interval
+        """
+        self.time_delta = time_delta
+
+    def run(self, context, run_next):
+        now = datetime.datetime.now()
+        last_run = context.get('INTERVAL_MATCHER_LAST', now)
+        context['INTERVAL_MATCHER_LAST'] = now
+        diff = now - last_run
+        if diff >= self.time_delta:
+            return run_next()
 
 
 class ContourMatcher(pipe.Pipe):

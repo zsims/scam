@@ -1,5 +1,7 @@
 import os
 import unittest
+import datetime
+import time
 from scam import detect, pipe
 
 class ContourMatcherTestCase(unittest.TestCase):
@@ -17,15 +19,16 @@ class ContourMatcherTestCase(unittest.TestCase):
         matcher.run(context, lambda: None)
         self.load_snapshot('snapshot2.jpg', context)
 
-        is_match= [False]
+        is_match = False
         def on_match():
-            is_match[0] = True
+            nonlocal is_match
+            is_match = True
 
         # Act
         matcher.run(context, on_match)
 
         # Act
-        self.assertTrue(is_match[0])
+        self.assertTrue(is_match)
 
     def test_match_same_false(self):
         # Arrange
@@ -35,11 +38,35 @@ class ContourMatcherTestCase(unittest.TestCase):
         matcher.run(context, lambda: None)
         self.load_snapshot('snapshot1.jpg', context)
 
-        is_match= [False]
+        is_match = False
         def on_match():
-            is_match[0] = True
+            nonlocal is_match
+            is_match = True
+
         # Act
         matcher.run(context, on_match)
 
         # Act
-        self.assertFalse(is_match[0])
+        self.assertFalse(is_match)
+
+
+class IntervalMatcherTestCase(unittest.TestCase):
+    def test_match_success(self):
+        # Arrange
+        context = {}
+        matcher = detect.IntervalMatcher(time_delta=datetime.timedelta(seconds=1))
+
+        is_match = False
+        def on_match():
+            nonlocal is_match
+            is_match = True
+
+        # Act
+        matcher.run(context, on_match)
+        self.assertFalse(is_match)
+
+        time.sleep(1.1)
+        matcher.run(context, on_match)
+
+        # Act
+        self.assertTrue(is_match)
