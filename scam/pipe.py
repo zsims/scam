@@ -14,7 +14,6 @@ class Runner(object):
         current_pipe = self.pipes[index]
         return lambda: current_pipe.error(self.context, exception, self.error_pipe(index + 1, exception))
 
-
     def run_pipe(self, index):
         if index >= len(self.pipes):
             return lambda: None
@@ -47,7 +46,6 @@ class LoopRunner(Runner):
             super().run()
             if self.sleep_seconds is not None:
                 time.sleep(self.sleep_seconds)
-        
 
 
 class Pipe(object):
@@ -65,3 +63,32 @@ class Pipe(object):
         Called if run fails, with the optional
         """
         return next_run()
+
+class CallbackPipe(Pipe):
+    """
+    Runs the given callback when the pipe is run
+    """
+    def __init__(self, run_callback):
+        self.run_callback = run_callback
+
+    def run(self, context, next_run):
+        self.run_callback(context, next_run)
+
+
+class Any(Pipe):
+    """
+    Continues the pipeline if any of the given pipes passes
+    The first passing pipe will continue execution without the others executing
+    """
+    def __init__(self, pipes):
+        self.pipes = pipes
+
+    def run(self, context, next_run):
+        for p in self.pipes:
+            called = False
+            def should_continue():
+                nonlocal called
+                called = True
+            p.run(context, should_continue)
+            if called:
+                return next_run()

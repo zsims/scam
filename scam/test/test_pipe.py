@@ -16,14 +16,6 @@ class PipeStub(pipe.Pipe):
         self.error_called = True
         return next_run()
 
-class CallbackPipe(pipe.Pipe):
-    def __init__(self, run_callback):
-        self.run_callback = run_callback
-
-    def run(self, context, next_run):
-        self.run_callback(context, next_run)
-
-
 class ErrorPipeStub(pipe.Pipe):
     def __init__(self):
         self.error_called = False
@@ -73,6 +65,46 @@ class PipeTestCase(unittest.TestCase):
         self.assertFalse(third.run_called)
         self.assertTrue(third.error_called)
 
+class AnyTestCase(unittest.TestCase):
+    def test_run_calls_next_lazy(self):
+        # Arrange
+        first = PipeStub()
+        second = pipe.Any([
+            PipeStub(),
+            PipeStub()
+        ])
+        third = PipeStub()
+
+        runner = pipe.Runner([first, second, third], {})
+
+        # Act
+        runner.run()
+
+        # Assert
+        self.assertTrue(second.pipes[0].run_called)
+        self.assertFalse(second.pipes[1].run_called)
+        self.assertTrue(third.run_called)
+
+    def test_run_calls_next_if_first_fails(self):
+        # Arrange
+        first = PipeStub()
+        second = pipe.Any([
+            pipe.CallbackPipe(lambda context, run_next: None),
+            PipeStub(),
+            PipeStub()
+        ])
+        third = PipeStub()
+
+        runner = pipe.Runner([first, second, third], {})
+
+        # Act
+        runner.run()
+
+        # Assert
+        self.assertTrue(second.pipes[1].run_called)
+        self.assertFalse(second.pipes[2].run_called)
+        self.assertTrue(third.run_called)
+
 class LoopRunnerTestCase(unittest.TestCase):
     def test_run_calls_next(self):
         # Arrange
@@ -87,7 +119,7 @@ class LoopRunnerTestCase(unittest.TestCase):
                 finish_event.set()
             call_count = call_count + 1
 
-        third = CallbackPipe(do_it)
+        third = pipe.CallbackPipe(do_it)
         runner = pipe.LoopRunner([first, second, third], {})
 
         # Act
