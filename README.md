@@ -41,11 +41,8 @@ With the following results:
 
 ![Frame1](https://raw.github.com/zsims/scam/master/scam/test/resources/snapshot1.jpg)
 
-**Frame 2**
 
-![Frame2](https://raw.github.com/zsims/scam/master/scam/test/resources/snapshot1.jpg)
-
-**Match with Bounding Box**
+**Frame 2 with Match Bounding Box**
 
 ![Match with Bounding Box](https://raw.github.com/zsims/scam/master/scam/test/resources/match.jpg)
 
