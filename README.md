@@ -3,6 +3,8 @@ Basic framework for creating headless motion detected security camera systems th
 
 It's intended to be flexible enough to be used for a variety of sitatuions, e.g. inverval based, motion detected, save to Dropbox, save to the filesystem etc.
 
+[![Build Status](https://travis-ci.org/zsims/scam.png)](https://travis-ci.org/zsims/scam)
+
 # Development
  1. Install requirements: `pip install -r requirements`
  2. Run tests: `python -m unittest`
